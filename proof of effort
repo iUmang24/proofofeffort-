@@ -1,0 +1,28 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.0;
+
+contract ProofOfEffortToken {
+    string public name = "Proof of Effort Token";
+    string public symbol = "POET";
+    uint8 public decimals = 18;
+    uint256 public totalSupply;
+    
+    mapping(address => uint256) public balanceOf;
+    mapping(address => uint256) public lastEffort;
+    
+    event Transfer(address indexed from, address indexed to, uint256 value);
+    event EffortLogged(address indexed user, uint256 effortTime, uint256 reward);
+
+    function logEffort(uint256 effortTime) public {
+        require(effortTime > 0, "Effort time must be greater than zero");
+        require(block.timestamp > lastEffort[msg.sender] + 1 minutes, "Wait before logging effort again");
+        
+        uint256 reward = effortTime * 10 ** uint256(decimals);
+        totalSupply += reward;
+        balanceOf[msg.sender] += reward;
+        lastEffort[msg.sender] = block.timestamp;
+
+        emit EffortLogged(msg.sender, effortTime, reward);
+        emit Transfer(address(0), msg.sender, reward);
+    }
+}
